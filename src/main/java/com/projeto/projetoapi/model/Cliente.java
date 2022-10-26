@@ -7,6 +7,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import lombok.Data;
+
+@Data
 @Entity
 public class Cliente {
     
@@ -74,23 +77,6 @@ public class Cliente {
 
     public void SetDataCadastro(Date dataCadastro){
         this.dataCadastro = dataCadastro;
-    }
-
-    @Override
-    public boolean equals(Object obj){
-        if(this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Cliente other = (Cliente) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals((other.id)))
-            return false;
-        return true;
     }
 
 }
