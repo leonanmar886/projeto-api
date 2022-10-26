@@ -62,4 +62,22 @@ public class ClienteController {
             return pessoa3.get(0);
         }
     } 
+
+    @RequestMapping(value = "/clientes/{campo}", method = RequestMethod.DELETE)
+    public void excluiCliente(@PathVariable String campo){
+        if(isNumeric(campo) == true){
+            Cliente pessoa1;
+            if(campo.length() == 11){
+                pessoa1 = clienteRepository.findByCpf(Long.parseLong(campo));
+            }else if(campo.length() == 9 ){
+                pessoa1 = clienteRepository.findByRg(Long.parseLong(campo));
+            } else {
+                pessoa1 = new Cliente();
+            }
+            clienteRepository.delete(pessoa1);
+        } else {
+            List<Cliente> pessoa3 = clienteRepository.findByNome(campo);
+            clienteRepository.delete(pessoa3.get(0));
+        }
+    }
 }
