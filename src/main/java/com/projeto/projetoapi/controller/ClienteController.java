@@ -2,7 +2,9 @@ package com.projeto.projetoapi.controller;
 
 import java.util.List;
 
+import org.apache.commons.lang3.ObjectUtils.Null;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,10 +33,33 @@ public class ClienteController {
         return clienteRepository.save(cliente);
     }
 
-    @RequestMapping(value = "/clientes/{nome}", method = RequestMethod.GET)
-    public List<Cliente> procuraNome(@PathVariable(value = "nome") String nome){
-        List<Cliente> pessoas = clienteRepository.findByNome(nome);
-        return pessoas;
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
-    
+
+    @RequestMapping(value = "/clientes/{campo}", method = RequestMethod.GET)
+    public Cliente procuraCliente(@PathVariable String campo){
+        if(isNumeric(campo) == true){
+            Cliente pessoa1;
+            if(campo.length() == 11){
+                pessoa1 = clienteRepository.findByCpf(Long.parseLong(campo));
+            }else if(campo.length() == 9 ){
+                pessoa1 = clienteRepository.findByRg(Long.parseLong(campo));
+            } else {
+                pessoa1 = new Cliente();
+            }
+            return pessoa1;
+        } else {
+            List<Cliente> pessoa3 = clienteRepository.findByNome(campo);
+            return pessoa3.get(0);
+        }
+    } 
 }

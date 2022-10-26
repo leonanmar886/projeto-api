@@ -10,4 +10,6 @@ import com.projeto.projetoapi.model.Cliente;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long>{
     List<Cliente> findByNome(String nome);
+    Cliente findByRg(Long Rg);
+    Cliente findByCpf(Long Cpf);
 }
