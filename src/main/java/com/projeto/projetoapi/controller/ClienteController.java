@@ -1,5 +1,7 @@
 package com.projeto.projetoapi.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils.Null;
@@ -15,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.projeto.projetoapi.model.Cliente;
+import com.projeto.projetoapi.model.Log;
 import com.projeto.projetoapi.repository.ClienteRepository;
+import com.projeto.projetoapi.repository.LogRepository;
 
 @RestController
 public class ClienteController {
@@ -23,13 +27,32 @@ public class ClienteController {
     @Autowired
     private ClienteRepository clienteRepository;
 
+    @Autowired
+    private LogRepository logRepository;
+
     @RequestMapping(value = "/clientes", method = RequestMethod.GET)
     public List<Cliente> listar(){
+        Log log = new Log();
+        Date dataHoraAtual = new Date();
+        String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
+        String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
+        log.setData(data);
+        log.setHora(hora);
+        log.setTipo("GET");
+        logRepository.save(log);
         return clienteRepository.findAll();
     }
 
     @RequestMapping(value = "/clientes", method = RequestMethod.POST)
     public Cliente adicionar(@RequestBody Cliente cliente){
+        Log log = new Log();
+        Date dataHoraAtual = new Date();
+        String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
+        String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
+        log.setData(data);
+        log.setHora(hora);
+        log.setTipo("POST");
+        logRepository.save(log);
         return clienteRepository.save(cliente);
     }
 
@@ -56,9 +79,25 @@ public class ClienteController {
             } else {
                 pessoa1 = new Cliente();
             }
+            Log log = new Log();
+            Date dataHoraAtual = new Date();
+            String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
+            String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
+            log.setData(data);
+            log.setHora(hora);
+            log.setTipo("GET");
+            logRepository.save(log);
             return pessoa1;
         } else {
             List<Cliente> pessoa3 = clienteRepository.findByNome(campo);
+            Log log = new Log();
+            Date dataHoraAtual = new Date();
+            String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
+            String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
+            log.setData(data);
+            log.setHora(hora);
+            log.setTipo("GET");
+            logRepository.save(log);
             return pessoa3.get(0);
         }
     } 
@@ -79,5 +118,13 @@ public class ClienteController {
             List<Cliente> pessoa3 = clienteRepository.findByNome(campo);
             clienteRepository.delete(pessoa3.get(0));
         }
+        Log log = new Log();
+        Date dataHoraAtual = new Date();
+        String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
+        String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
+        log.setData(data);
+        log.setHora(hora);
+        log.setTipo("DELETE");
+        logRepository.save(log);
     }
 }

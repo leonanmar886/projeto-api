@@ -9,16 +9,14 @@ import lombok.Data;
 
 @Data
 @Entity
-public class Cliente {
+public class Log {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long cpf;
-    private Long rg;
-    private String nome;
-    private String mae;
-    private String nascimento;
-    private String cadastro;
+    private String data;
+    private String tipo;
+    private String hora;
 
 }
+
