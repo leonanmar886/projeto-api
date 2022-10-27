@@ -4,13 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.ObjectUtils.Null;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,32 +25,7 @@ public class ClienteController {
     @Autowired
     private LogRepository logRepository;
 
-    @RequestMapping(value = "/clientes", method = RequestMethod.GET)
-    public List<Cliente> listar(){
-        Log log = new Log();
-        Date dataHoraAtual = new Date();
-        String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
-        String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
-        log.setData(data);
-        log.setHora(hora);
-        log.setTipo("GET");
-        logRepository.save(log);
-        return clienteRepository.findAll();
-    }
-
-    @RequestMapping(value = "/clientes", method = RequestMethod.POST)
-    public Cliente adicionar(@RequestBody Cliente cliente){
-        Log log = new Log();
-        Date dataHoraAtual = new Date();
-        String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
-        String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
-        log.setData(data);
-        log.setHora(hora);
-        log.setTipo("POST");
-        logRepository.save(log);
-        return clienteRepository.save(cliente);
-    }
-
+    // função que verifica se uma string é numérica.
     public static boolean isNumeric(String strNum) {
         if (strNum == null) {
             return false;
@@ -68,63 +38,88 @@ public class ClienteController {
         return true;
     }
 
-    @RequestMapping(value = "/clientes/{campo}", method = RequestMethod.GET)
-    public Cliente procuraCliente(@PathVariable String campo){
+    // função que verifica qual o tipo do campo. 1 = CPF, 2 = RG, 3 = Nome e 0 = Erro.
+    public int verificacaoCampo(String campo){
         if(isNumeric(campo) == true){
-            Cliente pessoa1;
-            if(campo.length() == 11){
-                pessoa1 = clienteRepository.findByCpf(Long.parseLong(campo));
-            }else if(campo.length() == 9 ){
-                pessoa1 = clienteRepository.findByRg(Long.parseLong(campo));
+            if(campo.length() == 11) {
+                return 1;
+            } else if(campo.length() == 9 ) {
+                return 2;
             } else {
-                pessoa1 = new Cliente();
+                return 0;
             }
-            Log log = new Log();
-            Date dataHoraAtual = new Date();
-            String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
-            String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
-            log.setData(data);
-            log.setHora(hora);
-            log.setTipo("GET");
-            logRepository.save(log);
-            return pessoa1;
         } else {
-            List<Cliente> pessoa3 = clienteRepository.findByNome(campo);
-            Log log = new Log();
-            Date dataHoraAtual = new Date();
-            String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
-            String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
-            log.setData(data);
-            log.setHora(hora);
-            log.setTipo("GET");
-            logRepository.save(log);
-            return pessoa3.get(0);
+            return 3;
         }
-    } 
+    }
 
-    @RequestMapping(value = "/clientes/{campo}", method = RequestMethod.DELETE)
-    public void excluiCliente(@PathVariable String campo){
-        if(isNumeric(campo) == true){
-            Cliente pessoa1;
-            if(campo.length() == 11){
-                pessoa1 = clienteRepository.findByCpf(Long.parseLong(campo));
-            }else if(campo.length() == 9 ){
-                pessoa1 = clienteRepository.findByRg(Long.parseLong(campo));
-            } else {
-                pessoa1 = new Cliente();
-            }
-            clienteRepository.delete(pessoa1);
-        } else {
-            List<Cliente> pessoa3 = clienteRepository.findByNome(campo);
-            clienteRepository.delete(pessoa3.get(0));
-        }
+    // função que forma um novo log.
+    public Log formarLog(String tipo){
         Log log = new Log();
         Date dataHoraAtual = new Date();
         String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
         String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
         log.setData(data);
         log.setHora(hora);
-        log.setTipo("DELETE");
-        logRepository.save(log);
+        log.setTipo(tipo); 
+        return log; 
+    }
+
+    @RequestMapping(value = "/clientes", method = RequestMethod.GET)
+    public List<Cliente> listar(){
+        logRepository.save(formarLog("GET")); //um novo log é montado com a data e hora atual, e depois é salvo no banco de dados.
+        return clienteRepository.findAll();
+    }
+
+    @RequestMapping(value = "/clientes", method = RequestMethod.POST)
+    public Cliente adicionar(@RequestBody Cliente cliente){
+        logRepository.save(formarLog("POST")); //um novo log é montado com a data e hora atual, e depois é salvo no banco de dados.
+        return clienteRepository.save(cliente);
+    }
+
+    @RequestMapping(value = "/clientes/{campo}", method = RequestMethod.GET)
+    public Cliente procuraCliente(@PathVariable String campo){
+        Cliente pessoa1;
+        switch(verificacaoCampo(campo)) {
+            case 1:
+                pessoa1 = clienteRepository.findByCpf(Long.parseLong(campo));
+            break;
+
+            case 2:
+                pessoa1 = clienteRepository.findByRg(Long.parseLong(campo));
+            break;
+
+            case 3:
+                List<Cliente> pessoa3 = clienteRepository.findByNome(campo);
+                return pessoa3.get(0);
+
+            default:
+                pessoa1 = new Cliente();
+            break;
+        }
+        logRepository.save(formarLog("GET"));
+        return pessoa1;
+    } 
+
+    @RequestMapping(value = "/clientes/{campo}", method = RequestMethod.DELETE)
+    public void excluiCliente(@PathVariable String campo){
+        Cliente pessoa1;
+
+        switch(verificacaoCampo(campo)){
+            case 1:
+                pessoa1 = clienteRepository.findByCpf(Long.parseLong(campo));
+            break;
+
+            case 2:
+                pessoa1 = clienteRepository.findByRg(Long.parseLong(campo));
+            break;
+
+            default:
+                pessoa1 = new Cliente();
+            break;
+        }
+
+        clienteRepository.delete(pessoa1);
+        logRepository.save(formarLog("DELETE"));
     }
 }
