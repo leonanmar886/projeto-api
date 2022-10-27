@@ -14,8 +14,8 @@ public class Cliente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long cpf;
-    private Long rg;
+    private Long cpf; //cpf foi definido com 11 digitos
+    private Long rg; //rg foi definido com 9 dígitos.
     private String nome;
     private String mae;
     private String nascimento;
